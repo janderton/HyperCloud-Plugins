@@ -25,3 +25,6 @@ Performs initial configuration and setup of Nginx
 
 Deploys WAR file into tomcat webapps folder
 
+### AWS List S3 Buckets
+
+Generates a listing of S3 buckets for a given region, key, and secret key

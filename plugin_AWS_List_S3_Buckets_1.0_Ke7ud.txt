@@ -1,0 +1,12 @@
+{
+  "referenceId": "Ke7ud",
+  "version": "1.0",
+  "name": "AWS_List_S3_Buckets",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "#!/bin/bash\n\napt-get update -y\napt-get install python3.6 -y\ncurl https://bootstrap.pypa.io/get-pip.py -o get-pip.py\npython3 get-pip.py\npip install awscli\n\nsudo mkdir ~/.aws\necho [default] > config\necho aws_access_key_id=<ACCESS_KEY> >> config\necho aws_secret_access_key=<SECRET_KEY> >> config\necho region=us-west-2 >> config\nmv config ~/.aws\n\naws s3 ls\n",
+  "envs": [],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
