@@ -1,0 +1,49 @@
+{
+  "referenceId": "8u6tS",
+  "version": "1.0",
+  "name": "Blueprint Provision",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "#!/bin/bash\n\n# Use this blueprint on Ubuntu Linux Images to provision subsequent blueprints (cascading) or use an Ubuntu container to run multiple blueprint builds from a single master blueprint\n\napt update && apt install -y curl jq\n\ncurl -sk --user $user:$token -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d '{\"blueprint\":\"$blueprintId\",\"cloudProvider\":\"$cloudProvider\",\"resourcePool\":\"$resourcePool\",\"cluster\":null,\"params\":[],\"terminationProtection\":\"DISABLED\",\"skipAgentInstall\":\"true\"}' \"$url/api/dockerservers/sdi\" | jq '.'\n\n\n",
+  "envs": [
+    {
+      "prop": "blueprintId",
+      "val": "2c9180866298794c0162fe15bee45023",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "url",
+      "val": "https://YourHCP.cloud",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "user",
+      "val": "user@tenant.cloud",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "token",
+      "val": "password",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "resourcePool",
+      "val": "2c91808661d8fef80161e51e68713b1d",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "cloudProvider",
+      "val": "2c91808761821a0a0161831a3c340025",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
