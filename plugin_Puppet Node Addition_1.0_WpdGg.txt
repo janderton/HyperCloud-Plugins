@@ -1,0 +1,19 @@
+{
+  "referenceId": "WpdGg",
+  "version": "1.0",
+  "name": "Puppet Node Addition",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "array=(`echo \"$nodes\"`)\n\nfor node in \"${array[@]}\"\ndo\n  echo \"###Node Defination for $node.\n\nnode '$node'{\n\n  class { 'nginx': }\n  class { '::mysql::server':\n  root_password           => 'HyperGrid123',\n  remove_default_accounts => true,\n  override_options        => \\$override_options\n  }\n\n}\" >> /etc/puppetlabs/code/environments/production/manifests/nodes.pp\ndone",
+  "envs": [
+    {
+      "prop": "nodes",
+      "val": "\"space separated Node Names\"",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
