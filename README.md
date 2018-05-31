@@ -119,3 +119,113 @@ apt update && apt install -y curl jq
 
 curl -sk --user $user:$token -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"blueprint":"$blueprintId","cloudProvider":"$cloudProvider","resourcePool":"$resourcePool","cluster":null,"params":[],"terminationProtection":"DISABLED","skipAgentInstall":"true"}' "$url/api/dockerservers/sdi" | jq '.'
 ```
+### Puppet Server App Deployment Blueprint
+
+The Blueprint can be used to deploy the containerized Puppet Server and install the nginx and mysql modules onto it to with some initial node definations created that configures the nginx and mysql on the defined nodes.
+It executes a plugin immediately after the container deployment which install the modules and creates initial node definations.
+
+```
+puppet:
+  image: puppet/puppetserver-standalone
+  name: puppethc 
+  hostname: puppethc
+  ports:
+  - 8140:8140
+  plugins:
+  - !plugin
+    id: JCiLs
+    arguments:
+      - modules=puppet-nginx puppetlabs-mysql
+      - nodes= <Enter space separated FQDN of nodes here>
+```
+### Puppet Server Node Addition Plugin
+
+You can have multiple node definations to be added later after the Puppet Server deployment using the Node Addition Plugin and providing the space separated node list as argument to it.
+
+```
+nodes="space separated Node Names"
+array=(`echo "$nodes"`)
+
+for node in "${array[@]}"
+do
+  echo "###Node Defination for $node.
+
+node '$node'{
+
+  class { 'nginx': }
+  class { '::mysql::server':
+  root_password           => 'HyperGrid123',
+  remove_default_accounts => true,
+  override_options        => \$override_options
+  }
+
+}" >> /etc/puppetlabs/code/environments/production/manifests/nodes.pp
+done
+```
+
+### Puppet Server Module Installation Plugin
+
+You can add multiple modules on a Puppet Server after the deployment so that these modules can be pushed to the nodes using node definations. You can use the Modules Installation Plugin providing the space separated list of the module names as they are in puppet forge.
+
+```
+modules="space separated list of mudule names"
+array=(`echo "$modules"`)
+for module in "${array[@]}"
+do
+  echo "Installing $module module"
+  puppet module install $module
+done
+```
+
+### Puppet Agent Installation Plugin
+
+You can install puppet agent on a node and make it a part of a Puppet Server from where it will pick up the configurations using the Puppet Agent Installation Plugin and provide the Puppet Server FQDN and it's IP as argument.
+
+```
+#!/bin/bash
+PUPPET_SERVER_FQDN="puppethc"
+PUPPET_SERVER_IP="10.100.12.99"
+OS_T=`ls /etc | grep -e "_version$"`
+echo "OS is: $OS_T"
+
+if [ ! -z "$OS_T" ]
+then
+  VERSION=`cat /etc/issue.net | grep -e "^Ubuntu 14.04"`
+  echo "Debian version is: $VERSION"
+  if [ ! -z "$VERSION" ]
+  then
+    echo "Starting code to install puppet on Ubuntu14.04"
+    wget https://apt.puppetlabs.com/puppet5-release-trusty.deb
+    dpkg -i puppet5-release-trusty.deb
+    apt-get update
+    apt-get install puppet-agent -y
+  fi
+  VERSION=`cat /etc/issue.net | grep -e "^Ubuntu 16.04"`
+  echo "Debian version is: $VERSION"
+  if [ ! -z "$VERSION" ]
+  then
+    echo "Starting code to install puppet on Ubuntu16.04"
+    wget https://apt.puppetlabs.com/puppet5-release-xenial.deb
+    dpkg -i puppet5-release-xenial.deb
+    apt update
+	apt install puppet-agent -y
+  fi
+fi
+OS_T=`ls /etc | grep -e "^centos-release$"`
+if [ ! -z "$OS_T" ]
+then
+  VERSION=`cat /etc/centos-release  | grep -e "^CentOS Linux release 7"`
+  echo "CentOS version is: $VERSION"
+  if [ ! -z "$VERSION" ]
+  then 
+    echo "Starting code to install puppet on CENTOS 7"
+	rpm -Uvh https://yum.puppet.com/puppet5/puppet5-release-el-7.noarch.rpm
+	yum install puppet-agent -y
+  fi
+  
+fi
+echo "$PUPPET_SERVER_IP    $PUPPET_SERVER_FQDN" >>/etc/hosts
+/opt/puppetlabs/bin/puppet config set server $PUPPET_SERVER_FQDN
+```
+
+

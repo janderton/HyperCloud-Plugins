@@ -1,0 +1,19 @@
+{
+  "referenceId": "vEi89",
+  "version": "1.0",
+  "name": "Puppet Module Installation",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "array=(`echo \"$modules\"`)\nfor module in \"${array[@]}\"\ndo\n  echo \"Installing $module module\"\n  puppet module install $module\ndone",
+  "envs": [
+    {
+      "prop": "modules",
+      "val": "\"puppet-nginx puppetlabs-mysql \"",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
