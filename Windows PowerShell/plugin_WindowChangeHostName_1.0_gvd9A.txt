@@ -1,0 +1,19 @@
+{
+  "referenceId": "gvd9A",
+  "version": "1.0",
+  "name": "WindowChangeHostName",
+  "license": "EULA",
+  "description": "Configure Windows Computer name",
+  "baseScript": "#Parameter Declaration\n$global:logfile = \"$env:temp\\WindowsCustomize.log\"\n$global:continueonerror = $false\n$global:cfg = @{}\n\n# Prints a fatal error message in red color and terminates script\nfunction ErrPt([string]$msg) {\n    Write-Host -ForegroundColor White -BackgroundColor Red \"[ ERROR ] $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ ERROR ] \" + $msg)\n    if($global:continueonerror -eq $false) {\n        Exit\n    }\n}\n\n# Prints warning messages in yellow, script continues after this\nfunction WarnPt([string]$msg) {\n    Write-Host -ForegroundColor Black -BackgroundColor Yellow \"[ WARN ]: $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ WARN ] \" + $msg)\n}\n\n# Information level print\nfunction InfPt([string]$msg) {\n    Write-Host -ForegroundColor White \"[ INFO ]\" -NoNewline\n    Write-Host \" $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 $msg\n}\n\n# Header print\n# todo: horizontal line\nfunction HeadPt([string]$msg) {\n    Write-Host -ForegroundColor Green \"$msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"===[ \" + $msg + \" ]===============\")\n}\n\n# Prints [ OK ] Message\nfunction OKPt([string]$msg) {\n    Write-Host -ForegroundColor Green \"[ OK ]\" -NoNewline\n    Write-Host \" $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ OK ]\" + $msg)\n}\n\nfunction RenameNode {\n    HeadPt \"Renaming Computer\"\n    if(($cfg.ThisNodeName) -and ($cfg.ThisNodeName -ne [system.environment]::MachineName)) {\n        InfPt (\"Hostname is \" + [system.environment]::MachineName + \", renaming \" + $cfg.ThisNodeName)\n        Rename-Computer -newName $($cfg.ThisNodeName)\n\t\tRestart-Computer -Force\n\t\t} else {\n        OKPt (\"Hostname alredy\" + [system.environment]::MachineName)\n\t\t}\n}\n\nfunction LoadConfig {\n\tHeadPt \"Loading Paramters\"\n\t$cfg.Clear()\n\t$cfg.Add(\"ThisNodeName\",\"$newHostName\")\n}\n\nfunction ValidateConfig {\n\tHeadpt \"Validating Paramters\"\n\t# Check VMName for Legal Characters\n\tif( ($($cfg.thisNodeName | Measure-Object -Character).Characters -gt 15) -or !(\"$($cfg.thisNodeName)\" -match \"^(([a-z\\d]|[a-z\\d][a-z\\d\\-]*[a-z\\d])\\.)*([a-z\\d]|[a-z\\d][a-z\\d\\-]*[a-z\\d])$\") ){\n\t\tErrPt \"Invalid HyperCloud VM Name. Must be less than 15 Characters - Allowed characters ar A-z0-9-.\"\n\t\t} else {\n\t\tInfPt \"Validated Hostname $($cfg.thisNodename)\"\n\t\t}\n}\n\nLoadConfig\nValidateConfig\nRenameNode",
+  "envs": [
+    {
+      "prop": "newHostName",
+      "val": "hghcp-win10",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "POWERSHELL",
+  "timeout": 45
+}

@@ -1,0 +1,37 @@
+{
+  "referenceId": "u11wL",
+  "version": "1.0",
+  "name": "WindowsJoinDomain",
+  "license": "EULA",
+  "description": "Configure Windows Computer name",
+  "baseScript": "#Parameter Declaration\n$global:logfile = \"$env:temp\\WindowsCustomize.log\"\n$global:continueonerror = $false\n$global:cfg = @{}\n\n# Prints a fatal error message in red color and terminates script\nfunction ErrPt([string]$msg) {\n    Write-Host -ForegroundColor White -BackgroundColor Red \"[ ERROR ] $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ ERROR ] \" + $msg)\n    if($global:continueonerror -eq $false) {\n        Exit\n    }\n}\n\n# Prints warning messages in yellow, script continues after this\nfunction WarnPt([string]$msg) {\n    Write-Host -ForegroundColor Black -BackgroundColor Yellow \"[ WARN ]: $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ WARN ] \" + $msg)\n}\n\n# Information level print\nfunction InfPt([string]$msg) {\n    Write-Host -ForegroundColor White \"[ INFO ]\" -NoNewline\n    Write-Host \" $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 $msg\n}\n\n# Header print\n# todo: horizontal line\nfunction HeadPt([string]$msg) {\n    Write-Host -ForegroundColor Green \"$msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"===[ \" + $msg + \" ]===============\")\n}\n\n# Prints [ OK ] Message\nfunction OKPt([string]$msg) {\n    Write-Host -ForegroundColor Green \"[ OK ]\" -NoNewline\n    Write-Host \" $msg\"\n    Add-Content -Path $global:logfile -Encoding UTF8 (\"[ OK ]\" + $msg)\n}\n\nfunction JoinAD {\n    HeadPt \"Joining HyperCloud Server to Customer AD/Domain\"\n    if(($cfg.DomainAdmin) -and ($cfg.DomainPassword)) {\n        $user = ($cfg.DomainAdmin + '@' + $cfg.DomainName)\n        $pass = ConvertTo-SecureString -AsPlainText -Force -String $cfg.DomainPassword\n        $cred = New-Object System.Management.Automation.PSCredential($user, $pass)\n\t\t} else {\n        Errpt \"Credentials Not Provided.\"\n\t\t#$cred = Get-Credential -Message \"Enter the $($cfg.domainName) credentials\" -Username \"$($cfg.DomainName)\\Administrator\"\n\t\t}\n    \n\t$serviceCredential=$cred\n\t[System.Reflection.Assembly]::LoadWithPartialName(\"System.DirectoryServices.AccountManagement\") | out-null\n\t$principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $($cfg.DomainName) ) \n\t$networkCredential = $ServiceCredential.GetNetworkCredential() \n\t$res=$($principalContext.ValidateCredentials($networkCredential.UserName, $networkCredential.Password )) \n\tif(!$res) {\n\t\tErrpt \"Inavlid credentials for $($networkCredential.UserName)\"\n\t\t} else {\n\t\tOkpt \"Domain User Credentials for $($serviceCredential.Username) validated\"\n\t\t}\n\t\n    if(($cfg.ThisNodeName) -and ($cfg.ThisNodeName -ne [system.environment]::MachineName)) {\n\t\tInfPt \"Joining HyperCloud Server $($cfg.ThisNodeName)to Customer Domain $($cfg.DomainName)\"\n\t\tStart-Sleep -Seconds 3\n\t\tAdd-Computer -DomainName $cfg.DomainName  -Credential $cred -NewName $cfg.ThisNodeName -errorvariable e -ErrorAction:SilentlyContinue\n\t\tif($e.count -gt 0) {\n\t\t\tErrPt \"$($e[0].Exception.Message)\"\n\t\t\t} else {\n\t\t\tRestart-Computer -Force -Confirm:$false\n\t\t\t}\n\t\t} else {\n\t\tInfPt \"Joining HyperCloud Server to Customer Domain $($env:COMPUTERNAME)\"\n\t\tStart-Sleep -Seconds 3\n\t\tAdd-Computer -DomainName $cfg.DomainName -Credential $cred -errorvariable e -ErrorAction:SilentlyContinue\n\t\tif($e.count -gt 0) {\n\t\t\tErrPt \"$($e[0].Exception.Message)\"\n\t\t\t} else {\n\t\t\tRestart-Computer -Force -Confirm:$false\n\t\t\t}\n\t\t}\n}\n\nfunction LoadConfig {\n\tHeadPt \"Loading Paramters\"\n\t$cfg.Clear()\n\t$cfg.Add(\"ThisNodeName\", \"$newHostName\")\n\t$cfg.Add(\"DomainAdmin\", \"$domainUser\")\n\t$cfg.Add(\"DomainPassword\", \"$domainPassword\")\n\t$cfg.Add(\"DomainName\", \"$domainName\")\n}\n\nfunction ValidateConfig {\n\tHeadpt \"Validating Paramters\"\n\t# Check VMName for Legal Characters\n\tif( ($($cfg.thisNodeName | Measure-Object -Character).Characters -gt 15) -or !(\"$($cfg.thisNodeName)\" -match \"^(([a-z\\d]|[a-z\\d][a-z\\d\\-]*[a-z\\d])\\.)*([a-z\\d]|[a-z\\d][a-z\\d\\-]*[a-z\\d])$\") ){\n\t\tErrPt \"Invalid HyperCloud VM Name. Must be less than 15 Characters - Allowed characters ar A-z0-9-.\"\n\t\t} else {\n\t\tInfPt \"Validated Hostname Format $($cfg.thisNodename)\"\n\t\t}\n\t\n\tif( !(\"$($cfg.domainName)\" -match \"(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\\.)+[a-zA-Z]{2,63}$)\")) {\n\t\tErrPt \"Invalid Domain Name $($cfg.DomainName).\"\n\t\t} else {\n\t\tInfPt \"Validated Domain Name Format $($cfg.thisNodename)\"\n\t\t}\n}\n\nLoadConfig\nValidateConfig\nJoinAd",
+  "envs": [
+    {
+      "prop": "newHostName",
+      "val": "hghcp-win10",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "domainUser",
+      "val": "Administrator",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "domainPassword",
+      "val": "Password",
+      "hidden": true,
+      "eval": null
+    },
+    {
+      "prop": "domainName",
+      "val": "hypergrid.com",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "POWERSHELL",
+  "timeout": 45
+}
