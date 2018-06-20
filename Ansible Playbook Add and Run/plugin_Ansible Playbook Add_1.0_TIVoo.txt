@@ -1,0 +1,19 @@
+{
+  "referenceId": "TIVoo",
+  "version": "1.0",
+  "name": "Ansible Playbook Add",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "if [ ! -f \"/home/all-roles.yml\" ]\nthen\n  echo \" All roles Playbook YAML not present so creating it...\"\n  echo \"---\n- hosts: all \n  roles:\" >> /home/all-roles.yml\nfi\narray=(`echo \"$ROLES\"`)\nfor ROLE in \"${array[@]}\"\ndo\n  echo \"    - role: $ROLE\" >> /home/all-roles.yml\ndone\ncd /home\nansible-playbook /home/all-roles.yml | tee /home/$RANDOM.log",
+  "envs": [
+    {
+      "prop": "ROLES",
+      "val": "geerlingguy.nginx geerlingguy.git",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
