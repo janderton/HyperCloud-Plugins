@@ -1,0 +1,19 @@
+{
+  "referenceId": "1RQxc",
+  "version": "1.0",
+  "name": "Ansible Roles Add",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "array=(`echo \"$ROLES\"`)\nfor ROLE in \"${array[@]}\"\ndo\n  ansible-galaxy install $ROLE\ndone",
+  "envs": [
+    {
+      "prop": "ROLES",
+      "val": "geerlingguy.nginx",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
