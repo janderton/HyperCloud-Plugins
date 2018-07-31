@@ -1,0 +1,19 @@
+{
+  "referenceId": "uX3f1",
+  "version": "1.0",
+  "name": "ConfigureNFSClient",
+  "license": "EULA",
+  "description": "Configure NFS Server on CentOS Server",
+  "baseScript": "#!/bin/bash\necho \"`date +'%F-%T'` [INFO] : Configuring NFS Mount\"\nmkdir -p /nfs-share\necho \"$nfsServer:/nfs-root /nfs-share  nfs defaults 0 0\" >> /etc/fstab\nmount -a",
+  "envs": [
+    {
+      "prop": "nfsServer",
+      "val": "10.100.66.100",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
