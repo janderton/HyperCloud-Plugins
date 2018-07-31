@@ -1,0 +1,19 @@
+{
+  "referenceId": "K6vIc",
+  "version": "1.0",
+  "name": "ConfigureNFSServer",
+  "license": "EULA",
+  "description": "Configure NFS Server on CentOS Server",
+  "baseScript": "#!/bin/bash\necho \"`date +'%F-%T'` [INFO] : Installing NFS Server\"\nyum install nfs-utils nfs-utils-lib -y\nyum install portmap -y\n\necho \"`date +'%F-%T'` [INFO] : Starting portmap service\"\n/etc/init.d/portmap start\necho \"`date +'%F-%T'` [INFO] : Starting portmap service\"\n/etc/init.d/nfs start\n\necho \"`date +'%F-%T'` [INFO] : Configuring portmap service startup\"\nchkconfig --level 35 portmap on\necho \"`date +'%F-%T'` [INFO] : Configuring nfs service startup\"\nchkconfig --level 35 nfs on\n\necho \"`date +'%F-%T'` [INFO] : Creating NFS Share\"\nmkdir /nfs-root\n\necho \"`date +'%F-%T'` [INFO] : Creating NFS Share Permissions for $nfsClient\"\necho \"/nfs-root $nfsClient(rw,sync,no_root_squash)",
+  "envs": [
+    {
+      "prop": "nfsClient",
+      "val": "10.100.66.0/24",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
