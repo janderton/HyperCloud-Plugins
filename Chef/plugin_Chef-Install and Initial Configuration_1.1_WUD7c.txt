@@ -1,0 +1,31 @@
+{
+  "referenceId": "WUD7c",
+  "version": "1.1",
+  "name": "Chef-Install and Initial Configuration",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "#!/bin/bash \nwget $CHEFSERVERURL -O /tmp/chef-server.deb\n\nwget $CHEFDKURL -O /tmp/chefdk.deb\n\nservice ufw stop \nservice ufw status \n\ndpkg -i /tmp/chef-server.deb\n\nchef-server-ctl reconfigure \n\nchef-server-ctl status \n\nmkdir -p /home/chef/certs\nchef-server-ctl user-create hg HyperGrid Inc hc@hypergrid.com HyperGrid123 --filename /home/chef/certs/hg.pem\nchef-server-ctl org-create $ORGNAME \"$ORGNAME is Automated Organization Create\" --association_user hg --filename /home/chef/$ORGNAME-validator.pem\n\n\nchef-server-ctl install chef-manage\nchef-server-ctl reconfigure\n\nchef-manage-ctl reconfigure --accept-license\n\ndpkg -i /tmp/chefdk.deb\n\ncd /home \nchef generate app hgchef\n\n##################################################################\nHOSTNAME=\"`hostname -f`\"\nmkdir -p /home/hgchef/.chef\necho \"current_dir = File.dirname(__FILE__)\nlog_level                :info\nlog_location             STDOUT\nnode_name                \\\"hg\\\"\nclient_key               \\\"#{current_dir}/hg.pem\\\"\nvalidation_client_name   '$ORGNAME-validator'\nvalidation_key           \\\"#{current_dir}/$ORGNAME-validator.pem\\\"\nchef_server_url          \\\"https://$HOSTNAME/organizations/$ORGNAME\\\"\ncookbook_path            [\\\"#{current_dir}/../cookbooks\\\"]\" >> /home/hgchef/.chef/knife.rb\n\ncp /home/chef/certs/hg.pem /home/hgchef/.chef/hg.pem\ncp /home/chef/$ORGNAME-validator.pem /home/hgchef/.chef/$ORGNAME-validator.pem\n\ncd /home/hgchef/.chef\nknife ssl fetch \nknife ssl check \nknife client list \n\n###################################################################################\ncd /home/hgchef/\ngit init \ngit add .\ngit commit -m \"First Commit\"\n\nknife cookbook site install jenkins\n\necho \"include_recipe 'jenkins::master'\ncase node['platform']\n  when 'ubuntu'\n    execute 'Update' do\n      command 'apt-get update && apt-get upgrade -y'\n    end\n    package 'NGINX INSTALL' do\n      package_name 'nginx'\n    end\n    package %w(postgresql postgresql-contrib) do\n      action :install\n    end\n  when 'centos'\n    package 'EPEL INSTALL ' do\n      package_name 'epel-release'\n    end\n    package 'NGINX INSTALL' do\n      package_name 'nginx'\n    end\n    package %w(postgresql-server postgresql-contrib) do\n      action :install\n    end\n    execute 'POSTGRES DB INIT' do\n      command 'postgresql-setup initdb ;  service postgresql start'\n    end\n    execute 'Enable rules for nginx and jenkins' do\n      command 'firewall-cmd --permanent --zone=public --add-service=http ; firewall-cmd --permanent --zone=public --add-service=https ; firewall-cmd --zone=public --add-port=8080/tcp --permanent ; firewall-cmd --reload'\n    end\nend\nservice 'nginx' do\n  action [:enable, :start]\nend\nservice 'postgresql' do\n  action [:enable, :start]\nend\nservice 'jenkins' do\n  action [:start]\nend\" > /home/hgchef/cookbooks/hgchef/recipes/recipe.rb\ngit add .\ngit commit -m \"Second Commit\"\nknife cookbook upload -a --include-dependencies",
+  "envs": [
+    {
+      "prop": "ORGNAME",
+      "val": "hgchef",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "CHEFSERVERURL",
+      "val": "https://packages.chef.io/files/stable/chef-server/12.17.33/ubuntu/16.04/chef-server-core_12.17.33-1_amd64.deb",
+      "hidden": false,
+      "eval": null
+    },
+    {
+      "prop": "CHEFDKURL",
+      "val": "https://packages.chef.io/files/stable/chefdk/2.4.17/ubuntu/16.04/chefdk_2.4.17-1_amd64.deb",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
