@@ -65,3 +65,19 @@ __[Puppet Module Install](https://github.com/hypergrid-inc/HyperCloud-Plugins/tr
 You can install puppet agent on a node and make it a part of a Puppet Server from where it will pick up the configurations using the Puppet Agent Installation Plugin and provide the Puppet Server FQDN and it's IP as argument.
 
 __[Puppet Agent Install](https://github.com/hypergrid-inc/HyperCloud-Plugins/tree/master/Puppet%20Agent%20Install)__
+
+
+### Chef Server Install and Initial Configuration
+
+This plugin installs the Chef server, Chef Mnagement Server and the Chef DK on the Ubuntu server and does the initial configuration related to cookbooks and recipes. This plugin adds the recipes for pushing jenkins, nginx and potgresql on the respective nodes.
+It requests for 3 arguments which are :
+  1) ORGNAME, it should be as string with no special charaters and should reperesent the Organization Name for the configuraiton managment.
+  2) CHEFSERVERURL, it is the URL for downloading the chef server installation file for ubuntu16 and might need updation with the changing stable version of Chef Server.
+  3) CHEFDKURL, it is the URL for downloading the chefdk installation file for ubuntu16 and might need updation with the changing stable version of ChefDK.
+
+
+### Chef Node Add
+
+This plugin installs chef client on the nodes specified and add the jenkins, nginx and postgresql installaton recipes to the node's run list so that when you give the command chef-client on the node it will pull the configurations from Chef Server and will install jenkins, nginx and postgresql on the node.
+This plugin takes a space separated list of the node details and node details consists of comma separated information about node like IP,nodename,username,password. These are required to install the chef client software on the nodes and build a secure communication. One example of the list of nodes is as below:
+10.0.9.100,node1,hc,HyperGrid123 10.0.9.200,node2,hc,HyperGrid123
