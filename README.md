@@ -75,9 +75,13 @@ It requests for 3 arguments which are :
   2) CHEFSERVERURL, it is the URL for downloading the chef server installation file for ubuntu16 and might need updation with the changing stable version of Chef Server.
   3) CHEFDKURL, it is the URL for downloading the chefdk installation file for ubuntu16 and might need updation with the changing stable version of ChefDK.
 
+https://github.com/hypergrid-inc/HyperCloud-Plugins/blob/Puneet-Mathur-Chef/Chef/plugin_Chef-Install%20and%20Initial%20Configuration_1.1_WUD7c.txt
 
 ### Chef Node Add
 
 This plugin installs chef client on the nodes specified and add the jenkins, nginx and postgresql installaton recipes to the node's run list so that when you give the command chef-client on the node it will pull the configurations from Chef Server and will install jenkins, nginx and postgresql on the node.
 This plugin takes a space separated list of the node details and node details consists of comma separated information about node like IP,nodename,username,password. These are required to install the chef client software on the nodes and build a secure communication. One example of the list of nodes is as below:
+
 10.0.9.100,node1,hc,HyperGrid123 10.0.9.200,node2,hc,HyperGrid123
+
+https://github.com/hypergrid-inc/HyperCloud-Plugins/blob/Puneet-Mathur-Chef/Chef/plugin_Chef%20Node%20Add_1.0_thbCw.txt
