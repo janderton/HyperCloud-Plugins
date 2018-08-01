@@ -1,0 +1,19 @@
+{
+  "referenceId": "thbCw",
+  "version": "1.0",
+  "name": "Chef Node Add",
+  "license": "EULA",
+  "description": null,
+  "baseScript": "#!/bin/bash\nARRAY=(`echo \"$node_details\"`)\nfor ARR in ${ARRAY[@]}\ndo\n  \n  CREDS=$(echo $ARR | tr \",\" \"\\n\")\n  CRED_ARR=($CREDS)\n  cd /home/hgchef\n  knife bootstrap ${CRED_ARR[0]} --node-name ${CRED_ARR[1]} --ssh-user ${CRED_ARR[2]} --ssh-password ${CRED_ARR[3]} --sudo --verbose\n  echo \"knife bootstrap ${CRED_ARR[0]} --node-name ${CRED_ARR[1]} --ssh-user ${CRED_ARR[2]} --ssh-password ${CRED_ARR[3]} --sudo --verbose\"\n  knife node run_list add  ${CRED_ARR[1]} 'recipe[hgchef::recipe]'\n  knife node run_list add  ${CRED_ARR[1]} 'recipe[jenkins::master]'\ndone\ncd /home/hgchef\nknife node list ",
+  "envs": [
+    {
+      "prop": "node_details",
+      "val": "10.0.9.100,test,hc,HyperGrid123 10.0.9.200,test,hc,HyperGrid123",
+      "hidden": false,
+      "eval": null
+    }
+  ],
+  "scriptArgs": null,
+  "scriptLang": "SHELL",
+  "timeout": 30
+}
