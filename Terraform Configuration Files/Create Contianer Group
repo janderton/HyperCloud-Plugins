@@ -1,0 +1,42 @@
+provider "azurerm" {
+}
+
+
+resource "azurerm_resource_group" "containers" {
+  name     = "HG-Containers"
+  location = "east us"
+}
+
+resource "azurerm_container_group" "hg-container-group" {
+  name                = "hgcontainers"
+  location            = "${azurerm_resource_group.containers.location}"
+  resource_group_name = "${azurerm_resource_group.containers.name}"
+  ip_address_type     = "public"
+  dns_name_label      = "hypercloud"
+  os_type             = "linux"
+  container {
+    name   = "jenkins"
+    image  = "jenkins/jenkins"
+    cpu    ="0.5"
+    memory =  "1.5"
+    port   = "8080"
+  }
+  container {
+    name = "nginx"
+    image = "library/nginx"
+    cpu = "0.5"
+    memory = "0.5"
+    port = "80"
+  }
+  tags {
+    environment = "testing"
+  }
+}
+output "Contianer Group IP" {
+
+ value = "${azurerm_container_group.hg-container-group.ip_address}"
+}
+output "Container DNS Name" {
+
+  value = "${azurerm_container_group.hg-container-group.fqdn}"
+}
